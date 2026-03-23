@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+enum VideoProcessingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatarUrl String?
+  bio       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  videos Video[]
+  tokens RefreshToken[]
+}
+
+model Video {
+  id           String               @id @default(uuid())
+  title        String
+  description  String?
+  videoUrl     String
+  thumbnailUrl String
+  duration     Int?
+  size         Int?
+  views        Int                  @default(0)
+  isPublished  Boolean              @default(true)
+  ownerId      String
+  owner        User                 @relation(fields: [ownerId], references: [id])
+  jobs         VideoProcessingJob[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+}
+
+model RefreshToken {
+  id     String @id @default(uuid())
+  token  String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model VideoProcessingJob {
+  id          String                @id @default(uuid())
+  videoId     String
+  status      VideoProcessingStatus @default(PENDING)
+  video       Video                 @relation(fields: [videoId], references: [id])
+  startedAt   DateTime              @default(now())
+  completedAt DateTime?
+}
