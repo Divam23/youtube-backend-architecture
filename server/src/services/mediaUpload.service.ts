@@ -25,3 +25,5 @@ const uploadMedia = async (
 
   return await uploadOnCloudinary(filePath, folder, resourceType)
 };
+
+export {uploadMedia}
